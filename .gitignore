@@ -40,3 +40,7 @@ Thumbs.db
 # agent scratch
 .claude/
 .codex/
+
+# local agent task files
+TASK.md
+runs.db
