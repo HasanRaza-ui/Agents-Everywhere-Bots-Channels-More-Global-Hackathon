@@ -1,0 +1,42 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+credentials.json
+service-account*.json
+
+# runtime
+*.db
+*.sqlite
+*.sqlite3
+data/
+uploads/
+media/
+*.log
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+dist/
+build/
+.next/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# agent scratch
+.claude/
+.codex/
