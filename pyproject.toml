@@ -7,6 +7,7 @@ dependencies = [
     "openai>=3.13.0",
     "opencv-python>=4.13.0.92",
     "python-dotenv>=1.2.3",
+    "pyttsx3>=2.99",
     "structlog>=26.1.0",
 ]
 

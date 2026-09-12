@@ -2,70 +2,79 @@
 
 **A camera agent that asks before it alarms.**
 
-Built for *Agents, Everywhere: Bots, Channels, & More* — OpenAI × AI Tinkerers, 12 Sep 2026.
+Built in one afternoon for *Agents, Everywhere: Bots, Channels, & More* — OpenAI × AI Tinkerers, 12 September 2026.
 
-> Not a medical device. Guardian detects potential safety events and asks whether the person
-> needs help. It does not diagnose medical conditions.
+> **Not a medical device.** Guardian detects potential safety events and asks whether the
+> person needs help. It does not diagnose medical conditions.
 
 ---
 
 ## The problem
 
-Camera monitoring for people living alone either records footage nobody watches, or alarms so
-often that the family switches it off. The failure that matters is not the missed fall — it is
-the forty false alarms that destroy trust in the system.
+A camera in the room of someone living alone either records footage nobody watches, or
+alarms so often that the family switches it off. The failure that matters isn't the missed
+fall — it's the forty false alarms that destroy trust in the system.
 
-Every existing product handles a false positive by routing it to a **human call-centre
-operator** who phones in and asks "are you okay?".
+Every existing product handles a false positive the same way: route it to a **human
+call-centre operator** who phones in and asks "are you okay?".
 
 ## What Guardian does differently
 
-It moves that verification step into the agent and into the room.
+It moves that verification step into the agent, and into the room.
 
 **Detect → ask → listen → escalate only on silence.**
 
 The camera decides nothing. It raises a question, the person answers it, and only silence
-escalates to a caregiver. Which means the detector is *allowed* to be imprecise — being wrong
+reaches a caregiver. Which means the detector is *allowed* to be imprecise — being wrong
 costs one spoken question instead of a false alarm to someone's daughter.
 
 **The pattern: the camera asks before it alarms.**
 
 ## Architecture
 
-Full diagram, trade-offs and design rationale: **[`docs/architecture.md`](docs/architecture.md)**
-
 <img src="docs/architecture.svg" alt="Guardian architecture" width="520">
 
 **Grey** = deterministic code · **teal** = model inference · **amber** = human in the loop.
 
-Three things hold this together:
+Full rationale and trade-offs: [`docs/architecture.md`](docs/architecture.md)
 
-1. **The vision model extracts, it never judges.** It is prompted to describe only what is
-   visible and forbidden from inferring health, consciousness or intent.
-2. **The safety gate is plain Python.** Two consecutive concern samples plus a cooldown, both
-   counters. A single frame can never raise an alarm.
-3. **Failure escalates, it does not go quiet.** A dropped camera or a failed API call notifies
-   the caregiver with the error. A monitoring system that fails silently is worse than none,
-   because it is trusted.
+Three decisions hold this together:
+
+**1. The vision model extracts; it never judges.** It is prompted to describe only what is
+visible and explicitly forbidden from inferring health, consciousness, intent, or whether
+something is an emergency ([`prompts/observe.md`](prompts/observe.md)). It is never asked
+"did the person fall?" — that is an event it cannot observe at 4-second sampling. It reports
+posture, floor contact, motion, and the evidence for each.
+
+**2. The safety gate is plain Python** ([`src/gate.py`](src/gate.py)). Two consecutive
+concern samples plus a cooldown, both counters. A single frame can never raise an alarm,
+and `still_for_seconds` is derived in code, never claimed by a model. This is the only part
+of the system that decides anything, and it is the only part with no network and no model —
+which is why it is the part we can fully test.
+
+**3. Failure escalates, it does not go quiet.** A dropped camera, a blocked lens, or a
+failed API call notifies the caregiver with the error. A monitoring system that fails
+silently is worse than none, because it is trusted.
+
+That third rule was not theoretical. During the build the webcam was held by another
+process, and the system refused to start rather than silently reporting an empty room.
 
 ## Quickstart
 
 ```bash
-git clone <this repo>
-cd agents-everywhere
 uv sync
 cp .env.example .env          # Windows: Copy-Item .env.example .env
 # fill in .env, then:
 uv run python scripts/verify_env.py    # checks every key with one real call
-uv run python -m src.main
+uv run python -m src.main              # q in the overlay window to quit
 ```
 
-`verify_env.py` prints a status table and never prints key material. Run it before you start
-and again before you record.
+`verify_env.py` prints a status table and never prints key material.
 
-## The integration contract
+## The evidence contract
 
-Agreed at minute 20, never renegotiated. Every component reads or writes this shape:
+Every component reads or writes this shape. It was agreed before any code was written and
+never renegotiated:
 
 ```json
 {
@@ -81,57 +90,66 @@ Agreed at minute 20, never renegotiated. Every component reads or writes this sh
 }
 ```
 
-`still_for_seconds` is **not** in this payload — the gate derives it as
-`concern_streak * SAMPLE_SECONDS`. Computed in code, never claimed by a model.
+**No confidence score.** The model is not asked for one and could not calibrate it.
+**No `fell?` field.** That is a judgment, and judgments belong to the gate.
 
-No confidence score. The model is not asked for one and could not calibrate it.
+## What's in here
 
-## Build order
+| File | What it does |
+|---|---|
+| `src/camera.py` | 5 fps into a rolling 10-second buffer; samples 5 frames with their real time span; fails loudly on a blocked or missing camera |
+| `src/observer.py` | Sends the 5 frames in one call, reads its prompt from `prompts/observe.md`, validates the contract |
+| `src/gate.py` | The safety decision. Plain Python, no model calls, fully tested |
+| `src/voice.py` | Speaks the check-in line |
+| `src/notify.py` | Telegram escalation with the frame, the evidence, and the reason |
+| `src/overlay.py` | The on-screen state, evidence booleans and countdown |
+| `src/config.py` | Config and an OpenAI key pool that fails over on quota and rate-limit errors |
+| `src/obs.py` | JSON logging and SQLite timing instrumentation |
+| `scripts/verify_env.py` | One real call per service; never prints a key |
+| `scripts/capture_fixtures.py` | Captures labelled test frames so perception can be tested without a camera |
+| `scripts/try_observer.py` | Probes the vision model against a fixture |
 
-**[`PROMPT.md`](PROMPT.md)** is the plan: ten steps, each with a verification gate. Do not
-start a step until the previous one's check passes. Steps 0–7 are the demo; 8–9 are upside;
-anything after that waits until the video is recorded.
+## Tests
 
-## Who builds what
+```bash
+uv run pytest
+```
 
-| Lane | Owner | Files | Done when |
-|---|---|---|---|
-| **Perception** | | `src/camera.py`, `src/observer.py` | a frame produces valid contract JSON |
-| **Reasoning** | | `src/agent.py`, `src/verifier.py` | unsupported claims come back struck |
-| **Safety** | | `src/gate.py`, `tests/test_gate.py` | gate tests pass with no network |
-| **Interaction** | | `src/voice.py`, `src/notify.py`, overlay | speaks, counts down, sends to Telegram |
+The gate is the safety-critical component, so it is the one with real coverage — and it
+needs no camera and no network, so it runs anywhere:
 
-Put your name in the table when you take a lane. One person per file — check `git status`
-before you start, and commit before handing a file to another agent or teammate.
+- one concern sample does not begin a check-in
+- two consecutive do
+- acknowledgement cancels and starts the cooldown
+- cooldown suppresses a re-trigger
+- an exception escalates rather than passing silently
 
-## Environment
+## Known limits
 
-See `.env.example`. You need, at minimum: `OPENAI_API_KEY`, `VISION_MODEL`,
-`OPENROUTER_API_KEY`, `CHALLENGER_MODEL`, `TELEGRAM_BOT_TOKEN`,
-`TELEGRAM_CAREGIVER_CHAT_ID`.
+Honest ones, because a monitoring system that oversells itself is the problem we set out to
+avoid.
 
-Each team member redeems their own $50 event credit and adds it as `OPENAI_API_KEY_2` / `_3`.
-The key pool fails over automatically on quota and rate-limit errors — one exhausted key will
-not stop the demo.
-
-## Agent instructions
-
-Every coding agent working here reads **[`AGENTS.md`](AGENTS.md)** — Codex natively, Claude
-Code as a fallback. One file, no `CLAUDE.md`, no drift. Read it before your first prompt.
+- Geometry catches a fall. It does not catch a slow decline — someone moving less over
+  weeks, or no longer appearing in frame at their usual times. That is baseline deviation
+  rather than event detection, and it is where the interesting product actually lives.
+- The human-approval step is honest for a prototype and wrong for production: at 3 a.m.
+  nobody is watching a screen. The real design is a tiered timeout, with approval reserved
+  for higher-severity actions like contacting emergency services.
+- **Frames leave the machine.** The prototype sends them to a hosted vision model.
+  Production would extract on-device and send only the four derived booleans — the
+  architecture is deliberately shaped so that is a single component swap, with everything
+  downstream of the evidence contract untouched.
+- Acknowledgement is a key press in this build; wave detection is wired but not enabled.
 
 ## Built during the hackathon
 
-**Scaffolded beforehand** (permitted starter code): the uv project, environment config and the
-OpenAI key pool, JSON logging and SQLite timing instrumentation, the Dockerfile, the
+**Scaffolded beforehand** (permitted starter code): the uv project, environment config and
+the OpenAI key pool, JSON logging and SQLite timing instrumentation, the Dockerfile, the
 environment verification script, and the agent instruction file.
 
-**Built on the day:** vision perception and the evidence contract, the agent and verifier, the
-safety gate and its tests, the spoken check-in, the acknowledgement paths, Telegram
-escalation, and the measured result below.
-
-## Measured result
-
-_TODO before submitting — from `runs.db` via `src/obs.py report()`._
+**Built on the day:** the camera buffer, the perception prompt and observer, the evidence
+contract, the safety gate and its tests, the spoken check-in, the overlay, Telegram
+escalation, and the architecture documentation.
 
 ## Prior art
 
@@ -140,8 +158,9 @@ _TODO before submitting — from `runs.db` via `src/obs.py report()`._
 conversational eldercare companion doing proactive check-ins and medication reminders.
 
 Detection is commodity and companionship is commercially served. Guardian's contribution is
-narrower: the **verification loop** — the agent resolving its own uncertainty by asking the
-person, instead of routing every false positive to a human operator.
+narrower and, we think, the useful one: the **verification loop** — the agent resolving its
+own uncertainty by asking the person, instead of routing every false positive to a human
+operator.
 
 ## Licence
 
