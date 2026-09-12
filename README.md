@@ -86,6 +86,12 @@ Agreed at minute 20, never renegotiated. Every component reads or writes this sh
 
 No confidence score. The model is not asked for one and could not calibrate it.
 
+## Build order
+
+**[`PROMPT.md`](PROMPT.md)** is the plan: ten steps, each with a verification gate. Do not
+start a step until the previous one's check passes. Steps 0–7 are the demo; 8–9 are upside;
+anything after that waits until the video is recorded.
+
 ## Who builds what
 
 | Lane | Owner | Files | Done when |

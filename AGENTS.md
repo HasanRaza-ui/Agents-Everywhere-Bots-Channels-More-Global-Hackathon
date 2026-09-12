@@ -23,6 +23,11 @@ a question, not an alarm. The person resolves the uncertainty. Only silence esca
 > help; it does not diagnose medical conditions. Keep this framing in every prompt, every
 > log line and every piece of copy.
 
+## Build order
+
+`PROMPT.md` holds the step order and the verification gate for each step. Follow it. Do not
+start a step before the previous gate passes, and do not silently skip a gate.
+
 ## Perception rules — read before touching src/observer.py
 
 **The vision model extracts evidence. It never judges.** Prompt it to describe only what is
@@ -104,3 +109,12 @@ the models distinct.
 - [ ] `README.md` states which parts were built during the hackathon and which were starter code
 - [ ] One measured number is recorded, with how it was measured
 - [ ] No secrets in git history
+
+## The observer prompt lives in a file
+
+`prompts/observe.md` is the single source of the perception prompt. `src/observer.py` must
+**read that file** rather than inlining the prompt text, so prompt tuning and code
+generation can happen in parallel without merge conflicts. Do not duplicate it.
+
+Test fixtures live in `tests/fixtures/` — captured frames the observer can be tested
+against with no live camera. `scripts/try_observer.py` probes a fixture directly.
