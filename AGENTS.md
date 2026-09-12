@@ -23,6 +23,17 @@ a question, not an alarm. The person resolves the uncertainty. Only silence esca
 > help; it does not diagnose medical conditions. Keep this framing in every prompt, every
 > log line and every piece of copy.
 
+## Authoritative documents
+
+Three files govern this repo. Consult all three before writing code; when they disagree,
+this order wins:
+
+1. **`AGENTS.md`** (this file) — the non-negotiable rules.
+2. **`docs/architecture.md`** — component boundaries, the evidence contract, what is
+   deterministic code versus model inference, and the trade-offs already decided. Do not
+   move a responsibility across a component boundary without saying so explicitly.
+3. **`PROMPT.md`** — the build order and the verification gate for each step.
+
 ## Build order
 
 `PROMPT.md` holds the step order and the verification gate for each step. Follow it. Do not
