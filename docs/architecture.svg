@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -16 520 1076" width="520" height="1076" role="img" aria-label="Guardian architecture: camera to pose perception to event detector to evidence JSON to agent, verifier, safety gate, spoken check-in, then either resolved or human approval and escalation.">
+
+      <rect x="-20" y="-16" width="520" height="1076" fill="#FFFFFF"/>
+      <style>
+    .n-box{stroke-width:1.5}
+    .n-code{fill:#E7ECEE;stroke:#4F5D65}
+    .n-model{fill:#DFEDF0;stroke:#0E6B7B}
+    .n-human{fill:#FAEEDB;stroke:#9C6A18}
+    .n-ok{fill:#E1F1E8;stroke:#1C7549}
+    .n-alert{fill:#FAE6E3;stroke:#AB2E22}
+    .n-data{fill:none;stroke:#8A959B;stroke-dasharray:4 3}
+    .n-gate{stroke-width:2.5}
+    .t-title{font-family:'IBM Plex Sans',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;fill:#13181B}
+    .t-detail{font-family:'IBM Plex Mono',Consolas,monospace;font-size:10.5px;fill:#5A666D}
+    .t-edge{font-family:'IBM Plex Mono',Consolas,monospace;font-size:10px;fill:#8A959B}
+    .t-ok{fill:#1C7549}
+    .t-alert{fill:#AB2E22}
+    .flow{stroke:#8A959B;stroke-width:1.5;fill:none}
+    .lgd{font-family:'IBM Plex Mono',Consolas,monospace;font-size:11px;fill:#5A666D}
+  </style>
+      <defs>
+        <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8A959B"/>
+        </marker>
+      </defs>
+
+      <!-- 1 camera -->
+      <rect class="n-box n-human" rx="4" x="90" y="16" width="300" height="50"/>
+      <text class="t-title" x="240" y="38" text-anchor="middle">Camera</text>
+      <text class="t-detail" x="240" y="54" text-anchor="middle">webcam · one frame every 5 s</text>
+      <path class="flow" d="M240 66 L240 96" marker-end="url(#arw)"/>
+
+      <!-- 2 pose -->
+      <rect class="n-box n-model" rx="4" x="90" y="98" width="300" height="56"/>
+      <text class="t-title" x="240" y="122" text-anchor="middle">Vision Perception</text>
+      <text class="t-detail" x="240" y="139" text-anchor="middle">OpenAI vision · extracts, never judges</text>
+      <path class="flow" d="M240 154 L240 184" marker-end="url(#arw)"/>
+
+      <!-- 3 detector -->
+      <rect class="n-box n-code" rx="4" x="90" y="186" width="300" height="56"/>
+      <text class="t-title" x="240" y="210" text-anchor="middle">Evidence Extractor</text>
+      <text class="t-detail" x="240" y="227" text-anchor="middle">structured JSON · 512px, low detail</text>
+      <path class="flow" d="M240 242 L240 272" marker-end="url(#arw)"/>
+
+      <!-- 4 evidence -->
+      <rect class="n-box n-data" rx="4" x="90" y="274" width="300" height="62"/>
+      <text class="t-title" x="240" y="297" text-anchor="middle">Evidence</text>
+      <text class="t-detail" x="240" y="314" text-anchor="middle">{ posture: lying, on_floor: true,</text>
+      <text class="t-detail" x="240" y="328" text-anchor="middle">visible_motion: none }</text>
+      <path class="flow" d="M240 336 L240 366" marker-end="url(#arw)"/>
+
+      <!-- 5 agent -->
+      <rect class="n-box n-model" rx="4" x="90" y="368" width="300" height="56"/>
+      <text class="t-title" x="240" y="392" text-anchor="middle">Guardian Agent</text>
+      <text class="t-detail" x="240" y="409" text-anchor="middle">reasons over evidence, never over pixels</text>
+      <path class="flow" d="M240 424 L240 454" marker-end="url(#arw)"/>
+
+      <!-- 6 verifier -->
+      <rect class="n-box n-model" rx="4" x="90" y="456" width="300" height="56"/>
+      <text class="t-title" x="240" y="480" text-anchor="middle">Verifier</text>
+      <text class="t-detail" x="240" y="497" text-anchor="middle">different model · strikes unsupported claims</text>
+      <path class="flow" d="M240 512 L240 542" marker-end="url(#arw)"/>
+
+      <!-- 7 gate -->
+      <rect class="n-box n-code n-gate" rx="4" x="90" y="544" width="300" height="62"/>
+      <text class="t-title" x="240" y="568" text-anchor="middle">Safety Gate</text>
+      <text class="t-detail" x="240" y="585" text-anchor="middle">≥ 2 consecutive events · cooldown active?</text>
+      <text class="t-detail" x="240" y="599" text-anchor="middle">plain code — never a prompt</text>
+      <path class="flow" d="M240 606 L240 636" marker-end="url(#arw)"/>
+
+      <!-- 8 check-in -->
+      <rect class="n-box n-human" rx="4" x="90" y="638" width="300" height="62"/>
+      <text class="t-title" x="240" y="662" text-anchor="middle">Spoken Check-in</text>
+      <text class="t-detail" x="240" y="679" text-anchor="middle">“Are you okay? Wave at the camera.”</text>
+      <text class="t-detail" x="240" y="693" text-anchor="middle">30-second window</text>
+
+      <!-- branch -->
+      <path class="flow" d="M240 700 L240 722"/>
+      <path class="flow" d="M122 722 L358 722"/>
+      <path class="flow" d="M122 722 L122 758" marker-end="url(#arw)"/>
+      <path class="flow" d="M358 722 L358 758" marker-end="url(#arw)"/>
+
+      <text class="t-edge t-ok" x="122" y="740" text-anchor="middle">answered</text>
+      <text class="t-edge t-alert" x="358" y="740" text-anchor="middle">silence</text>
+
+      <!-- 9 resolved -->
+      <rect class="n-box n-ok" rx="4" x="18" y="760" width="208" height="62"/>
+      <text class="t-title t-ok" x="122" y="784" text-anchor="middle">Resolved</text>
+      <text class="t-detail" x="122" y="801" text-anchor="middle">wave · button · speech</text>
+      <text class="t-detail" x="122" y="815" text-anchor="middle">logged, no alert sent</text>
+
+      <!-- 10 human approval -->
+      <rect class="n-box n-human" rx="4" x="254" y="760" width="208" height="62"/>
+      <text class="t-title" x="358" y="784" text-anchor="middle">Human Approval</text>
+      <text class="t-detail" x="358" y="801" text-anchor="middle">caregiver confirms</text>
+      <text class="t-detail" x="358" y="815" text-anchor="middle">before anything is sent</text>
+      <path class="flow" d="M358 822 L358 856" marker-end="url(#arw)"/>
+
+      <!-- 11 escalate -->
+      <rect class="n-box n-alert" rx="4" x="254" y="858" width="208" height="62"/>
+      <text class="t-title t-alert" x="358" y="882" text-anchor="middle">Escalate</text>
+      <text class="t-detail" x="358" y="899" text-anchor="middle">Telegram · frame,</text>
+      <text class="t-detail" x="358" y="913" text-anchor="middle">evidence, timestamp</text>
+
+    
+      <g transform="translate(0,962)">
+        <line x1="0" y1="0" x2="480" y2="0" stroke="#D5DBDE" stroke-width="1"/>
+        <rect x="2"   y="14" width="12" height="12" rx="2" fill="#E7ECEE" stroke="#4F5D65" stroke-width="1.5"/>
+        <text class="lgd" x="20"  y="24">deterministic code</text>
+        <rect x="150" y="14" width="12" height="12" rx="2" fill="#DFEDF0" stroke="#0E6B7B" stroke-width="1.5"/>
+        <text class="lgd" x="168" y="24">model inference</text>
+        <rect x="288" y="14" width="12" height="12" rx="2" fill="#FAEEDB" stroke="#9C6A18" stroke-width="1.5"/>
+        <text class="lgd" x="306" y="24">human in the loop</text>
+        <text class="lgd" x="2" y="52" font-size="10" fill="#8A959B">Guardian — the camera asks before it alarms. Every safety-critical decision sits in a grey box.</text>
+      </g>
+    </svg>

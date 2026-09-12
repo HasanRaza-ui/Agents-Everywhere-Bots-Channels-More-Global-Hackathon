@@ -21,6 +21,15 @@ resolves the uncertainty. Escalation happens only when nobody answers.
 
 ## Flow
 
+<img src="architecture.svg" alt="Guardian architecture" width="520">
+
+**Grey** = deterministic code · **teal** = model inference · **amber** = human in the loop.
+Every safety-critical decision sits in a grey box: the models describe and reason, they
+never decide what the system is permitted to do.
+
+<details>
+<summary>Mermaid source</summary>
+
 ```mermaid
 flowchart TD
     CAM["Camera<br/><small>one frame every 5s</small>"]
@@ -52,6 +61,8 @@ flowchart TD
     class OK ok
     class ESC alert
 ```
+
+</details>
 
 Grey nodes are deterministic code. Teal nodes are model inference. Amber nodes involve a
 human. Every safety-critical decision sits in a grey node: the models describe and reason,

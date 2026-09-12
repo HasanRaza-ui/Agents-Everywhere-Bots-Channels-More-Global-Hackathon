@@ -34,13 +34,9 @@ costs one spoken question instead of a false alarm to someone's daughter.
 
 Full diagram, trade-offs and design rationale: **[`docs/architecture.md`](docs/architecture.md)**
 
-```
-Camera → Vision Perception → Evidence → Agent → Verifier → Safety Gate → Spoken Check-in
-                                                                              │
-                                                          answered ───────────┴─────────── silence
-                                                              │                              │
-                                                          Resolved                    Human Approval → Escalate
-```
+<img src="docs/architecture.svg" alt="Guardian architecture" width="520">
+
+**Grey** = deterministic code · **teal** = model inference · **amber** = human in the loop.
 
 Three things hold this together:
 
