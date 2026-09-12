@@ -12,9 +12,43 @@ A hackathon entry for "Agents, Everywhere: Bots, Channels, & More" (OpenAI × AI
 Tinkerers, 12 Sep 2026). Built in a 4h15 window. Judged globally on a 2-minute video,
 a written description, and this repository.
 
-**Project:** _(fill in at 11:15)_
-**Channel it lives in:** _(fill in)_
-**The pattern it demonstrates:** _(fill in)_
+**Project:** Guardian — a camera agent for people living alone.
+**Channel it lives in:** the physical room — a camera to see, a speaker to ask,
+Telegram to escalate. Remove it from the room and there is nothing to observe and
+nobody to ask.
+**The pattern it demonstrates:** **the camera asks before it alarms.** Detection raises
+a question, not an alarm. The person resolves the uncertainty. Only silence escalates.
+
+> Not a medical device. Detects potential safety events and asks whether the person needs
+> help; it does not diagnose medical conditions. Keep this framing in every prompt, every
+> log line and every piece of copy.
+
+## Perception rules — read before touching src/observer.py
+
+**The vision model extracts evidence. It never judges.** Prompt it to describe only what is
+visible, and explicitly forbid inferring health, consciousness, intent or emergency status.
+If it is asked "is this an emergency", the safety decision moves inside a prompt, the gate
+owns nothing, and the Verifier has no independent claim to check.
+
+The contract it returns:
+
+```json
+{
+  "person_visible": true,
+  "posture": "standing|sitting|lying|unknown",
+  "on_floor": true,
+  "visible_motion": "none|slight|normal",
+  "scene_notes": ["short factual observations"],
+  "evidence": ["what in the image supports each field"]
+}
+```
+
+- **No confidence score.** Never ask for one; never invent one.
+- **No `rapid_descent` field.** At 3–5 second sampling the fall itself is not observable,
+  only its aftermath. Claiming otherwise is an unsupported claim in our own contract.
+- **`still_for_seconds` is derived by the gate**, as `concern_streak * SAMPLE_SECONDS`.
+  Computed in code, never returned by a model.
+- Resize frames to 512px and use `detail: "low"`. Temperature near 0, JSON mode on.
 
 ## Non-negotiable design rules
 
@@ -55,6 +89,7 @@ These come from the judging rubric. Do not quietly drop them to save time.
 
 | Role | Where | Why |
 |---|---|---|
+| Vision perception | OpenAI vision via `VISION_MODEL` | no install risk; sees scene context a pose skeleton cannot |
 | Proposer / main reasoning | OpenAI via `OPENAI_API_KEY` | event credits |
 | Challenger / verifier | OpenRouter via `OPENROUTER_API_KEY`, **non-OpenAI model** | independence is the point; the same model checking itself is not a check |
 | Transcription / vision | OpenAI | |
