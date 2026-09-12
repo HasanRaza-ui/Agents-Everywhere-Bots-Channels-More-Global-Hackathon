@@ -24,8 +24,9 @@ Return ONLY this JSON:
 FIELD DEFINITIONS
 - posture: the orientation of the person's torso. "lying" means the torso axis is closer
   to horizontal than vertical.
-- on_floor: the person's body is in contact with the ground plane, not with furniture.
-  A person lying on a sofa or bed is NOT on_floor.
+- on_floor: the person's torso is resting on the ground — lying or collapsed on the floor.
+  Someone standing or walking is NOT on_floor, even though their feet touch the ground.
+  Someone lying on a sofa or bed is NOT on_floor.
 - visible_motion: compare against the previous description supplied in the user message,
   if one is given. With no prior description, return "unknown".
 - scene_notes: only environmental facts that a responder would want — an overturned

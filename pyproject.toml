@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
     "openai>=3.13.0",
+    "opencv-python>=4.13.0.92",
     "python-dotenv>=1.2.3",
     "structlog>=26.1.0",
 ]
